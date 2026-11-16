@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block titulo %}Inventario{% endblock %}
+{% block contenido %}
+
+<div class="encabezado">
+    <div>
+        <h1>Inventario</h1>
+        <p>{{ resumen.total }} {{ 'repuesto registrado' if resumen.total == 1 else 'repuestos registrados' }}.</p>
+    </div>
+    <a class="boton" href="{{ url_for('agregar_producto') }}">Agregar repuesto</a>
+</div>
+
+{% if resumen.reponer > 0 and filtro != 'reponer' %}
+<div class="aviso-reposicion">
+    <span><strong>{{ resumen.reponer }} {{ 'repuesto está' if resumen.reponer == 1 else 'repuestos están' }} en su mínimo o por debajo.</strong>
+    {% if resumen.agotados > 0 %}{{ resumen.agotados }} {{ 'está agotado' if resumen.agotados == 1 else 'están agotados' }}.{% endif %}</span>
+    <a href="{{ url_for('index', filtro='reponer') }}">Ver cuáles</a>
+</div>
+{% endif %}
+
+<form class="buscador" action="{{ url_for('index') }}" method="get" role="search">
+    <input type="search" name="q" value="{{ texto }}" placeholder="Busca por código, nombre, marca o vehículo" aria-label="Buscar repuestos" autofocus>
+    {% if filtro %}<input type="hidden" name="filtro" value="{{ filtro }}">{% endif %}
+    <button class="boton" type="submit">Buscar</button>
+</form>
+
+<nav class="filtros" aria-label="Filtrar por existencias">
+    <a href="{{ url_for('index', q=texto or None) }}" class="{{ 'activo' if not filtro }}">Todos<small>{{ resumen.total }}</small></a>
+    <a href="{{ url_for('index', q=texto or None, filtro='reponer') }}" class="{{ 'activo' if filtro == 'reponer' }}">Por reponer<small>{{ resumen.reponer }}</small></a>
+    <a href="{{ url_for('index', q=texto or None, filtro='agotado') }}" class="{{ 'activo' if filtro == 'agotado' }}">Agotados<small>{{ resumen.agotados }}</small></a>
+</nav>
+
+{% if productos %}
+<div class="tabla-envoltura">
+<table class="tabla-inventario" id="tablaInventario">
+    <thead>
+        <tr>
+            <th>Código</th>
+            <th>Repuesto</th>
+            <th class="ocultar-movil">Marca</th>
+            <th class="ocultar-movil">Ubicación</th>
+            <th class="num">Precio de venta</th>
+            <th>Existencias</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for p in productos %}
+        <tr data-producto-id="{{ p.id }}" data-stock="{{ p.stock }}" data-minimo="{{ p.stock_minimo }}"
+            data-estado="{{ estado_stock(p) }}"
+            data-busqueda="{{ [p.codigo, p.nombre, p.marca, p.compatibilidad, p.categoria]|select|join(' ') }}">
+            <td class="codigo">{% if p.codigo %}{{ p.codigo }}{% else %}<span class="sin-dato">Sin código</span>{% endif %}</td>
+            <td class="repuesto">
+                <strong>{{ p.nombre }}</strong>
+                {% if p.compatibilidad %}<small>{{ p.compatibilidad }}</small>{% endif %}
+            </td>
+            <td class="ocultar-movil">{{ p.marca or '' }}</td>
+            <td class="ocultar-movil">{{ p.ubicacion or '' }}</td>
+            <td class="num precio">{{ p.precio_venta|cop }}</td>
+            <td class="existencia estado-{{ estado_stock(p) }}">
+                <span class="existencia-cifra">{{ p.stock }}<small>mín. {{ p.stock_minimo }}</small></span>
+                <div class="barra-nivel"><span style="width: {{ nivel_stock(p) }}%"></span></div>
+                {% if estado_stock(p) == 'agotado' %}<span class="etiqueta-estado">Agotado</span>
+                {% elif estado_stock(p) == 'reponer' %}<span class="etiqueta-estado">Por reponer</span>{% endif %}
+            </td>
+            <td class="acciones">
+                <a class="boton boton-chico" href="{{ url_for('registrar_movimiento', producto_id=p.id) }}">Movimiento</a>
+                <a class="boton boton-sec boton-chico" href="{{ url_for('editar_producto', producto_id=p.id) }}">Editar</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+<p class="pie-tabla" id="pieTabla">Mostrando {{ productos|length }} {{ 'repuesto' if productos|length == 1 else 'repuestos' }}.</p>
+
+{% elif texto or filtro %}
+<div class="vacio">
+    <p>No hay repuestos que coincidan{% if texto %} con «{{ texto }}»{% endif %}.</p>
+    <a class="boton boton-sec" href="{{ url_for('index') }}">Ver todo el inventario</a>
+</div>
+{% else %}
+<div class="vacio">
+    <p>Aún no hay repuestos en el inventario.</p>
+    <a class="boton" href="{{ url_for('agregar_producto') }}">Agregar el primero</a>
+    {% if session.usuario_rol == 'admin' %}<a class="boton boton-sec" href="{{ url_for('importar') }}">Importar desde Excel</a>{% endif %}
+</div>
+{% endif %}
+
+{% endblock %}

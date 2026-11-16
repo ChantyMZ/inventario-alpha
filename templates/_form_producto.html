@@ -1,0 +1,68 @@
+{% macro campo(nombre, etiqueta, tipo='text', requerido=False, ayuda='', atributos='', clase='') %}
+<div class="campo {{ clase }} {{ 'con-error' if errores.get(nombre) }}">
+    <label for="{{ nombre }}">{{ etiqueta }}</label>
+    <input type="{{ tipo }}" id="{{ nombre }}" name="{{ nombre }}"
+           value="{{ datos.get(nombre) if datos.get(nombre) is not none else '' }}"
+           {% if requerido %}required{% endif %} {{ atributos|safe }}>
+    {% if errores.get(nombre) %}<span class="error">{{ errores[nombre] }}</span>{% endif %}
+    {% if ayuda %}<span class="ayuda">{{ ayuda }}</span>{% endif %}
+</div>
+{% endmacro %}
+
+<form class="formulario" action="{{ accion }}" method="post" novalidate
+      data-offline="{{ 'producto_editar' if producto else 'producto_nuevo' }}"
+      {% if producto %}data-producto-id="{{ producto.id }}" data-nombre="{{ producto.nombre }}"{% endif %}>
+
+    <fieldset>
+        <legend>Identificación</legend>
+        <div class="rejilla">
+            {{ campo('codigo', 'Código', ayuda='La referencia del fabricante o la que usas en el almacén.') }}
+            {{ campo('marca', 'Marca') }}
+            {{ campo('nombre', 'Nombre del repuesto', requerido=True, clase='ancho') }}
+            <div class="campo">
+                <label for="categoria_id">Categoría</label>
+                <select id="categoria_id" name="categoria_id">
+                    <option value="">Sin categoría</option>
+                    {% for cat in categorias %}
+                    <option value="{{ cat.id }}" {{ 'selected' if datos.get('categoria_id')|string == cat.id|string }}>{{ cat.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {{ campo('ubicacion', 'Ubicación en el almacén', ayuda='Estante o bin, por ejemplo B-3.') }}
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend>Para qué vehículos sirve</legend>
+        <div class="rejilla">
+            {{ campo('compatibilidad', 'Compatibilidad', clase='ancho', ayuda='Marca, modelo y años, por ejemplo: Toyota Hilux 2005-2015, Fortuner 2008-2014.') }}
+            <div class="campo ancho">
+                <label for="descripcion">Notas</label>
+                <textarea id="descripcion" name="descripcion">{{ datos.get('descripcion') or '' }}</textarea>
+            </div>
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend>Precios y existencias</legend>
+        <div class="rejilla">
+            {{ campo('precio_compra', 'Precio de compra', 'number', True, atributos='min="0" step="0.01"') }}
+            {{ campo('precio_venta', 'Precio de venta', 'number', True, atributos='min="0" step="0.01"') }}
+            {% if producto %}
+            <div class="campo">
+                <label for="stock_actual">Unidades en existencia</label>
+                <input id="stock_actual" value="{{ producto.stock }}" readonly>
+                <span class="ayuda">Para cambiarlas, <a href="{{ url_for('registrar_movimiento', producto_id=producto.id) }}">registra un movimiento</a> y queda guardado quién lo hizo.</span>
+            </div>
+            {% else %}
+            {{ campo('stock', 'Unidades que hay ahora', 'number', True, atributos='min="0" step="1"') }}
+            {% endif %}
+            {{ campo('stock_minimo', 'Stock mínimo', 'number', False, ayuda='Cuando las unidades lleguen a este número, el sistema avisa que hay que reponer.', atributos='min="0" step="1"') }}
+        </div>
+    </fieldset>
+
+    <div class="acciones-form">
+        <button type="submit" class="boton">{{ 'Guardar cambios' if producto else 'Guardar repuesto' }}</button>
+        <a href="{{ url_for('index') }}">Cancelar</a>
+    </div>
+</form>

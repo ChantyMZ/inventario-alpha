@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block titulo %}Agregar repuesto{% endblock %}
+{% block contenido %}
+<div class="encabezado"><h1>Agregar repuesto</h1></div>
+{% set producto = none %}
+{% set accion = url_for('agregar_producto') %}
+{% include '_form_producto.html' %}
+{% endblock %}

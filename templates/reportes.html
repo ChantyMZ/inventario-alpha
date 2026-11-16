@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block titulo %}Reportes{% endblock %}
+{% block contenido %}
+<div class="encabezado"><h1>Reportes</h1></div>
+
+<section class="seccion">
+    <h2>Hay que reponer</h2>
+    {% if stock_bajo %}
+    <div class="tabla-envoltura">
+    <table>
+        <thead>
+            <tr><th>Código</th><th>Repuesto</th><th class="num">Unidades</th><th class="num">Mínimo</th><th></th></tr>
+        </thead>
+        <tbody>
+            {% for p in stock_bajo %}
+            <tr>
+                <td class="codigo">{{ p.codigo or '' }}</td>
+                <td class="repuesto"><strong>{{ p.nombre }}</strong>{% if p.marca %}<small>{{ p.marca }}</small>{% endif %}</td>
+                <td class="num"><span class="cambio {{ 'menos' if p.stock == 0 }}">{{ p.stock }}</span></td>
+                <td class="num">{{ p.stock_minimo }}</td>
+                <td class="acciones"><a class="boton boton-chico" href="{{ url_for('registrar_movimiento', producto_id=p.id) }}">Registrar entrada</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    {% else %}
+    <p>Todos los repuestos tienen existencias por encima de su mínimo.</p>
+    {% endif %}
+</section>
+
+<section class="seccion">
+    <h2>Más vendidos</h2>
+    {% if mas_vendidos %}
+    {% set maximo = mas_vendidos[0].total_vendido|int %}
+    <ol class="ranking">
+        {% for item in mas_vendidos %}
+        <li>
+            <span>{{ item.producto }}{% if item.codigo %} <small class="sin-dato">{{ item.codigo }}</small>{% endif %}</span>
+            <span class="ranking-valor">{{ item.total_vendido|int }}</span>
+            <span class="ranking-barra"><span style="width: {{ (item.total_vendido|int / maximo * 100)|round|int if maximo else 0 }}%"></span></span>
+        </li>
+        {% endfor %}
+    </ol>
+    <p class="pie-tabla">Unidades que han salido del almacén, los 15 primeros.</p>
+    {% else %}
+    <p>Aún no hay salidas registradas.</p>
+    {% endif %}
+</section>
+
+<section class="seccion">
+    <h2>Entradas y salidas por repuesto</h2>
+    {% if entradas_salidas %}
+    <div class="tabla-envoltura">
+    <table>
+        <thead>
+            <tr><th>Repuesto</th><th class="num">Entradas</th><th class="num">Salidas</th></tr>
+        </thead>
+        <tbody>
+            {% for item in entradas_salidas %}
+            <tr>
+                <td class="repuesto"><strong>{{ item.producto }}</strong>{% if item.codigo %}<small>{{ item.codigo }}</small>{% endif %}</td>
+                <td class="num"><span class="cambio mas">{{ item.total_entradas|int }}</span></td>
+                <td class="num"><span class="cambio menos">{{ item.total_salidas|int }}</span></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    {% else %}
+    <p>Aún no hay movimientos registrados.</p>
+    {% endif %}
+</section>
+{% endblock %}

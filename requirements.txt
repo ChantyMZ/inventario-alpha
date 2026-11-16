@@ -1,0 +1,8 @@
+Flask
+mysql-connector-python
+Authlib
+requests
+openpyxl
+python-dotenv
+gunicorn
+tzdata

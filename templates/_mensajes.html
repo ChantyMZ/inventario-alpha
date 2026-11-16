@@ -1,0 +1,46 @@
+{% set iconos = {
+    'exito':  '<path d="M5.5 12.5l4.2 4.2L18.5 8"/>',
+    'error':  '<path d="M7 7l10 10M17 7L7 17"/>',
+    'aviso':  '<path d="M12 7.5v5.5M12 16.5v.01"/>',
+    'alerta': '<path d="M12 4.5l8.5 15h-17z"/><path d="M12 10.5v3.5M12 17v.01"/>',
+    'info':   '<path d="M12 11v5.5M12 7.5v.01"/>'
+} %}
+{% set titulos = {
+    'exito': 'Listo',
+    'error': 'Error',
+    'aviso': 'Atención',
+    'alerta': 'Stock bajo',
+    'info': 'Información'
+} %}
+{% with mensajes = get_flashed_messages(with_categories=true) %}
+    {% if mensajes %}
+    <div class="avisos" aria-live="polite">
+        {% for categoria, mensaje in mensajes %}
+        {% set tipo = categoria if categoria in titulos else 'info' %}
+        <div class="aviso aviso-{{ tipo }}" role="{{ 'alert' if tipo == 'error' else 'status' }}"
+             style="--duracion: {{ 12 if tipo in ('error', 'alerta') else 6 }}s">
+            <span class="aviso-icono" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">{{ iconos[tipo]|safe }}</svg>
+            </span>
+            <div class="aviso-texto">
+                <strong>{{ titulos[tipo] }}</strong>
+                <span>{{ mensaje }}</span>
+            </div>
+            <button type="button" class="aviso-cerrar" aria-label="Cerrar notificación">&times;</button>
+            <span class="aviso-tiempo" aria-hidden="true"></span>
+        </div>
+        {% endfor %}
+    </div>
+    <script>
+    document.querySelectorAll('.aviso').forEach(function (aviso) {
+        function cerrar() {
+            if (aviso.classList.contains('saliendo')) return;
+            aviso.classList.add('saliendo');
+            setTimeout(function () { aviso.remove(); }, 250);
+        }
+        aviso.querySelector('.aviso-cerrar').addEventListener('click', cerrar);
+        aviso.querySelector('.aviso-tiempo').addEventListener('animationend', cerrar);
+    });
+    </script>
+    {% endif %}
+{% endwith %}

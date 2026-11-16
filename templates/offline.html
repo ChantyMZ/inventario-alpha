@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block titulo %}Sin conexión{% endblock %}
+{% block body %}
+<div class="acceso">
+    <aside class="acceso-lado">
+        <div class="marca-lado">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo de Repuestos Alfa">
+        </div>
+        <div>
+            <h1>Sin conexión</h1>
+            <p>Esta pantalla todavía no se había abierto con internet en este equipo.</p>
+        </div>
+    </aside>
+    <main class="acceso-form">
+        <div>
+            <h2>No se pudo abrir esta página</h2>
+            <p>Vuelve al inventario: ahí puedes seguir registrando movimientos y todo se sube solo cuando regrese el internet.</p>
+            <a class="boton" href="/">Ir al inventario</a>
+        </div>
+    </main>
+</div>
+{% endblock %}

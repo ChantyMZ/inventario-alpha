@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block titulo %}Inventario{% endblock %} | Repuestos Alfa</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
+    <link rel="manifest" href="{{ url_for('manifest') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/apple-touch-icon.png') }}">
+    <meta name="theme-color" content="#12295C">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600;700&family=Barlow+Semi+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilo.css') }}">
+    <script src="{{ url_for('static', filename='js/cola.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/offline.js') }}" defer></script>
+</head>
+<body data-usuario-id="{{ session.get('usuario_id', '') }}">
+{% block body %}
+    <header class="barra">
+        <div class="barra-interior">
+            <a class="marca" href="{{ url_for('index') }}">
+                <img class="marca-logo" src="{{ url_for('static', filename='img/logo.png') }}" alt="">Repuestos Alfa
+            </a>
+            <nav class="menu">
+                <a href="{{ url_for('index') }}" class="{{ 'activo' if request.path == '/' or request.path.startswith(('/agregar', '/editar')) }}">Inventario</a>
+                <a href="{{ url_for('ver_movimientos') }}" class="{{ 'activo' if request.path.startswith(('/movimiento')) }}">Movimientos</a>
+                <a href="{{ url_for('reportes') }}" class="{{ 'activo' if request.path.startswith('/reportes') }}">Reportes</a>
+                {% if session.usuario_rol == 'admin' %}
+                <a href="{{ url_for('importar') }}" class="{{ 'activo' if request.path.startswith('/importar') }}">Importar Excel</a>
+                {% endif %}
+            </nav>
+            <div class="sesion">
+                <button type="button" id="estadoRed" class="estado-red" hidden aria-haspopup="dialog"><span></span></button>
+                <span>{{ session.usuario_nombre }}</span>
+                <a href="{{ url_for('logout') }}" id="enlaceSalir">Cerrar sesión</a>
+            </div>
+        </div>
+    </header>
+    <main class="contenedor">
+        {% include '_mensajes.html' %}
+        {% block contenido %}{% endblock %}
+    </main>
+    <dialog id="panelCola" class="panel-cola" aria-labelledby="tituloCola">
+        <h2 id="tituloCola">Cambios hechos en este equipo</h2>
+        <p class="panel-ayuda">Lo que registras sin internet se guarda aquí y se sube solo cuando vuelve la conexión.</p>
+        <ul id="listaCola" class="lista-cola"></ul>
+        <div class="acciones-form">
+            <button type="button" id="subirAhora" class="boton">Subir ahora</button>
+            <button type="button" id="cerrarPanel" class="boton boton-sec">Cerrar</button>
+        </div>
+    </dialog>
+{% endblock %}
+</body>
+</html>

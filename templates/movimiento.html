@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block titulo %}Registrar movimiento{% endblock %}
+{% block contenido %}
+<div class="encabezado"><h1>Registrar movimiento</h1></div>
+
+<div class="ficha">
+    <div><small>Código</small><strong>{{ producto.codigo or 'Sin código' }}</strong></div>
+    <div><small>Repuesto</small><strong>{{ producto.nombre }}</strong></div>
+    <div><small>Unidades ahora</small><strong id="stockActual">{{ producto.stock }}</strong></div>
+    <div><small>Stock mínimo</small><strong>{{ producto.stock_minimo }}</strong></div>
+</div>
+
+<form class="formulario" action="{{ url_for('registrar_movimiento', producto_id=producto.id) }}" method="post" id="formMovimiento"
+      data-offline="movimiento" data-producto-id="{{ producto.id }}" data-nombre="{{ producto.nombre }}" data-stock="{{ producto.stock }}">
+    <div class="tipo-movimiento">
+        <div>
+            <input type="radio" name="tipo" id="tipoEntrada" value="entrada" checked>
+            <label for="tipoEntrada">Entrada<small>Llegó mercancía o un cliente devolvió.</small></label>
+        </div>
+        <div>
+            <input type="radio" name="tipo" id="tipoSalida" value="salida">
+            <label for="tipoSalida">Salida<small>Se vendió o salió del almacén.</small></label>
+        </div>
+    </div>
+
+    <div class="rejilla">
+        <div class="campo">
+            <label for="cantidad">Cantidad</label>
+            <input type="number" name="cantidad" id="cantidad" min="1" step="1" required>
+        </div>
+        <div class="campo">
+            <label for="motivo">Motivo</label>
+            <input type="text" name="motivo" id="motivo" placeholder="Venta en mostrador, pedido a proveedor...">
+        </div>
+    </div>
+
+    <p class="resultado-previo" id="resultadoPrevio" aria-live="polite"></p>
+
+    <div class="acciones-form">
+        <button type="submit" class="boton">Registrar movimiento</button>
+        <a href="{{ url_for('index') }}">Cancelar</a>
+    </div>
+</form>
+
+<script>
+    var form = document.getElementById('formMovimiento');
+    var previo = document.getElementById('resultadoPrevio');
+
+    function calcular() {
+        var stockActual = parseInt(document.getElementById('stockActual').textContent, 10);
+        var cantidad = parseInt(document.getElementById('cantidad').value, 10);
+        var salida = document.getElementById('tipoSalida').checked;
+        previo.className = 'resultado-previo';
+        if (!cantidad || cantidad < 1) { previo.textContent = ''; return true; }
+        if (salida && cantidad > stockActual) {
+            previo.className = 'resultado-previo mal';
+            previo.textContent = 'No alcanza: hay ' + stockActual + ' unidades.';
+            return false;
+        }
+        var nuevo = salida ? stockActual - cantidad : stockActual + cantidad;
+        previo.textContent = 'Quedarán ' + nuevo + ' ' + (nuevo === 1 ? 'unidad' : 'unidades') + '.';
+        return true;
+    }
+
+    form.addEventListener('input', calcular);
+    form.addEventListener('submit', function (e) { if (!calcular()) e.preventDefault(); });
+</script>
+{% endblock %}

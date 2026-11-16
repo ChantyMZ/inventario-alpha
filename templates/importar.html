@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block titulo %}Importar desde Excel{% endblock %}
+{% block contenido %}
+<div class="encabezado"><h1>Importar desde Excel</h1></div>
+
+<div class="texto-guia">
+    <p>Sube el Excel con el inventario actual y los repuestos pasan a la base de datos. El archivo debe ser .xlsx y la primera fila debe tener los nombres de las columnas.</p>
+    <p>Se reconocen estas columnas: <strong>Código</strong>, <strong>Nombre</strong>, <strong>Marca</strong>, <strong>Categoría</strong>, <strong>Compatibilidad</strong>, <strong>Ubicación</strong>, <strong>Precio compra</strong>, <strong>Precio venta</strong>, <strong>Stock</strong> y <strong>Stock mínimo</strong>. Solo el nombre es obligatorio.</p>
+    <p>Si un repuesto ya existe (mismo código o mismo nombre), se actualiza con los datos del Excel y el cambio de unidades queda en el historial de movimientos. Las categorías que no existan se crean.</p>
+</div>
+
+<form class="formulario" action="{{ url_for('importar') }}" method="post" enctype="multipart/form-data">
+    <div class="campo" style="margin-bottom: 1.25rem; max-width: 460px;">
+        <label for="archivo">Archivo de Excel</label>
+        <input type="file" id="archivo" name="archivo" accept=".xlsx" required>
+    </div>
+    <button type="submit" class="boton">Importar inventario</button>
+</form>
+
+{% if resultado %}
+<section class="resultado-importacion">
+    <h2>Resultado</h2>
+    <div class="cifras">
+        <div><strong>{{ resultado.nuevos }}</strong>repuestos nuevos</div>
+        <div><strong>{{ resultado.actualizados }}</strong>actualizados</div>
+        <div><strong>{{ resultado.errores|length }}</strong>filas con problemas</div>
+    </div>
+    {% if resultado.errores %}
+    <p>Estas filas no se importaron:</p>
+    <ul>
+        {% for fila, motivo in resultado.errores[:30] %}<li>Fila {{ fila }}: {{ motivo }}</li>{% endfor %}
+    </ul>
+    {% endif %}
+    <p style="margin-top: 1rem;"><a class="boton boton-sec" href="{{ url_for('index') }}">Ver el inventario</a></p>
+</section>
+{% endif %}
+{% endblock %}

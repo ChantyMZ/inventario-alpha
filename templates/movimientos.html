@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block titulo %}Movimientos{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+    <div>
+        <h1>Movimientos</h1>
+        <p>Cada entrada y salida de mercancía, con quién la registró.</p>
+    </div>
+</div>
+
+{% if movimientos %}
+<div class="tabla-envoltura">
+<table>
+    <thead>
+        <tr>
+            <th>Fecha</th>
+            <th>Repuesto</th>
+            <th class="num">Cantidad</th>
+            <th>Motivo</th>
+            <th>Registró</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for m in movimientos %}
+        <tr>
+            <td>{{ m.fecha|fecha }}</td>
+            <td class="repuesto"><strong>{{ m.producto }}</strong>{% if m.codigo %}<small>{{ m.codigo }}</small>{% endif %}</td>
+            <td class="num">
+                {% if m.tipo == 'entrada' %}<span class="cambio mas">+{{ m.cantidad }}</span> <small>entrada</small>
+                {% else %}<span class="cambio menos">−{{ m.cantidad }}</span> <small>salida</small>{% endif %}
+            </td>
+            <td>{{ m.motivo or '' }}</td>
+            <td>{{ m.usuario }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+<p class="pie-tabla">Se muestran los últimos {{ movimientos|length }} movimientos.</p>
+{% else %}
+<div class="vacio">
+    <p>Todavía no hay movimientos. Se guardan solos cuando registras una entrada o una salida.</p>
+    <a class="boton" href="{{ url_for('index') }}">Ir al inventario</a>
+</div>
+{% endif %}
+{% endblock %}

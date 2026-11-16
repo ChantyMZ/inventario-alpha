@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block titulo %}Iniciar sesión{% endblock %}
+{% block body %}
+<div class="acceso">
+    <aside class="acceso-lado">
+        <div class="marca-lado">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo de Repuestos Alfa">
+        </div>
+        <div>
+            <h1>Inventario del almacén</h1>
+            <p>Consulta existencias, registra entradas y salidas y mira qué hay que reponer.</p>
+        </div>
+        <small>Maicao, La Guajira</small>
+    </aside>
+    <main class="acceso-form">
+        <div>
+            <h2>Iniciar sesión</h2>
+            {% include '_mensajes.html' %}
+            <form action="{{ url_for('login') }}" method="post">
+                <div class="campo">
+                    <label for="email">Correo electrónico</label>
+                    <input type="email" id="email" name="email" autocomplete="email" required autofocus>
+                </div>
+                <div class="campo">
+                    <label for="password">Contraseña</label>
+                    <input type="password" id="password" name="password" autocomplete="current-password" required>
+                </div>
+                <button type="submit" class="boton">Ingresar</button>
+            </form>
+            {% if google_habilitado %}
+            <p class="separador">o</p>
+            <a class="boton boton-sec" style="width: 100%;" href="{{ url_for('login_google') }}">Continuar con Google</a>
+            {% endif %}
+            <p class="alterno">¿Aún no tienes cuenta? <a href="{{ url_for('registro') }}">Crear cuenta</a></p>
+        </div>
+    </main>
+</div>
+{% endblock %}
