@@ -189,7 +189,7 @@ Para utilizar esta función, abre la aplicación e inicia sesión **antes** de d
 
 - La base de datos debe estar iniciada y correctamente configurada para utilizar el sistema.
 - El repositorio **no incluye Docker** ni una API REST completa para todas las operaciones CRUD; su interfaz principal utiliza vistas y formularios de Flask.
-- Para despliegues públicos se requieren variables de entorno seguras, una base de datos accesible y HTTPS.
+- Para despliegues públicos se requieren variables de entorno seguras, una base de datos accesible y HTTPS
 
 ---
 
